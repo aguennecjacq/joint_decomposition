@@ -60,9 +60,11 @@ def joint_decomposition_natural_images(input_img, nb_iter, mu, device):
     nb_patches = f_patch.shape[0]
     std = torch.tensor([f_ref, np.zeros_like(f_ref)], dtype=torch.float32).unsqueeze(0)
     std = std.to(device)
-
-    nb_of_patches_batch = 4  # set this up depending on your available compute power
-
+    
+    if device.type == "cpu":
+        nb_of_patches_batch = 4  # set this up depending on your available compute power
+    else:
+        nb_of_patches_batch = 16
     for iter_ in range(nb_iter):
         std_patch = po.patchify(std)
         for p_idx in range(0, nb_patches, nb_of_patches_batch):
@@ -76,7 +78,7 @@ def joint_decomposition_natural_images(input_img, nb_iter, mu, device):
 
     return u_out, v_out
 
-def joint_decomposition(input_img, nb_iter, mu, device):
+def joint_decomposition(input_img, nb_iter, mu, device, gpu_compute):
 
     if max(input_img.shape) > 64:
         return joint_decomposition_natural_images(input_img, nb_iter, mu, device)
